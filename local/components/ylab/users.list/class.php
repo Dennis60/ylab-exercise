@@ -30,7 +30,7 @@ class UsersListComponent extends \CBitrixComponent
 
         if (\Bitrix\Main\Loader::includeModule("iblock")) {
             $arSelect = Array("ID", "NAME");
-            $arFilter = Array("IBLOCK_ID" => $this->arParams[USERS_IBLOCK_ID], "ACTIVE" => "Y");
+            $arFilter = Array("IBLOCK_ID" => $this->arParams["USERS_IBLOCK_ID"], "ACTIVE" => "Y");
 
             try {
                 $oUsers = \Bitrix\Iblock\ElementTable::getList(array('select' => $arSelect, 'filter' => $arFilter));
