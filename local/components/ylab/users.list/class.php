@@ -30,7 +30,7 @@ class UsersListComponent extends \CBitrixComponent
 
         if (\Bitrix\Main\Loader::includeModule("iblock")) {
             $arSelect = Array("ID", "NAME");
-            $arFilter = Array("IBLOCK_ID" => $this->arParams["USERS_IBLOCK_ID"], "ACTIVE" => "Y");
+            $arFilter = Array("IBLOCK_ID" => $this->getIBlockID($this->arParams["USERS_IBLOCK_CODE"]), "ACTIVE" => "Y");
 
             try {
                 $oUsers = \Bitrix\Iblock\ElementTable::getList(array('select' => $arSelect, 'filter' => $arFilter));
@@ -48,5 +48,28 @@ class UsersListComponent extends \CBitrixComponent
         }
 
         return $arUsers;
+    }
+
+    /**
+     * Получение ID инфоблока по его коду
+     *
+     * @param $sBlockCode
+     * @return mixed
+     */
+    protected function getIBlockID($sBlockCode)
+    {
+        try {
+            if (\Bitrix\Main\Loader::includeModule("iblock")) {
+                $arFilter = array(
+                    'CODE' => $sBlockCode,
+                    'CHECK_PERMISSIONS' => 'N'
+                );
+                if ($oIBlock = \CIBlock::GetList(array('SORT' => 'ASC'), $arFilter)->Fetch()) {
+                    return $oIBlock['ID'];
+                }
+            }
+        } catch (\Bitrix\Main\LoaderException $e) {
+            $e->getMessage();
+        }
     }
 }

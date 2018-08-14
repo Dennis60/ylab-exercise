@@ -1,0 +1,13 @@
+{
+    "name": "dennis60/local",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Denis Semenov",
+            "email": "dennis60@mail.ru"
+        }
+    ],
+    "require": {
+        "robmorgan/phinx": "^0.10.5"
+    }
+}
