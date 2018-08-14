@@ -79,7 +79,7 @@ class AddUserComponent extends ComponentValidation
         return [
             'name' => 'required',
             'birthday' => 'required|date_format:d.m.Y',
-            'phone' => 'required|regex:/\+7\d{10}/',
+            'phone' => 'required|regex:/^\+7\d{10}$/',
             'city' => 'required|numeric|in:' . implode(',', array_keys($this->arCities))
         ];
     }

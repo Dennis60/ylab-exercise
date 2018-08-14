@@ -160,24 +160,36 @@ class Init extends AbstractMigration
      */
     protected function addIBlockType()
     {
-        $arFields = Array(
+        $arFilterBlockType = array(
             'ID' => $this->arMigrationData['IBLOCK_TYPE_ID'],
-            'SECTIONS' => 'Y',
-            'IN_RSS' => 'N',
-            'SORT' => 100,
-            'LANG' => Array(
-                'ru' => Array(
-                    'NAME' => $this->arMigrationData['IBLOCK_TYPE_NAME_RU']
-                ),
-                'en' => Array(
-                    'NAME' => $this->arMigrationData['IBLOCK_TYPE_NAME_EN']
-                ),
-            )
+            'CHECK_PERMISSIONS' => 'N'
         );
 
-        $oIBlockType = new \CIBlockType;
-        if (!$oIBlockType->Add($arFields)) {
-            $this->throwException(__METHOD__, "тип инфоблока не создан");
+        if (\CIBlockType::GetList(array('SORT' => 'ASC'), $arFilterBlockType)->Fetch()) {
+
+            $this->throwException(__METHOD__, "тип инфоблока существует");
+
+        } else {
+
+            $arFields = Array(
+                'ID' => $this->arMigrationData['IBLOCK_TYPE_ID'],
+                'SECTIONS' => 'Y',
+                'IN_RSS' => 'N',
+                'SORT' => 100,
+                'LANG' => Array(
+                    'ru' => Array(
+                        'NAME' => $this->arMigrationData['IBLOCK_TYPE_NAME_RU']
+                    ),
+                    'en' => Array(
+                        'NAME' => $this->arMigrationData['IBLOCK_TYPE_NAME_EN']
+                    ),
+                )
+            );
+
+            $oIBlockType = new \CIBlockType;
+            if (!$oIBlockType->Add($arFields)) {
+                $this->throwException(__METHOD__, "тип инфоблока не создан");
+            }
         }
     }
 
