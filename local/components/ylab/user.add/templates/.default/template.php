@@ -40,7 +40,7 @@
     <div>
         <label>
             Город<br>
-            <select name="city"/>
+            <select name="city">
                 <option value="">Выбрать</option>
                 <? foreach ($arResult['CITIES'] as $iCityID => $sCityName): ?>
                     <option value="<?= $iCityID ?>"<?= (isset($arResult['REQUEST']['city']) && $arResult['REQUEST']['city'] == $iCityID) ? ' selected="selected"' : '' ?>>
