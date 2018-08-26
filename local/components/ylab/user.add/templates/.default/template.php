@@ -11,7 +11,7 @@
 /** @var string $componentPath */
 /** @var CBitrixComponent $component */
 ?>
-
+<a href="/users/list">Список пользователей</a>
 <form action="" method="post" class="form form-block">
     <?= bitrix_sessid_post() ?>
     <? if (count($arResult['ERRORS'])): ?>
@@ -28,7 +28,7 @@
     <div>
         <label>
             Дата рождения<br>
-            <input type="text" name="birthday"<?= isset($arResult['REQUEST']['birthday']) ? ' value="' . $arResult['REQUEST']['birthday'] . '"' : '' ?>/>
+            <input type="text" name="datebirth"<?= isset($arResult['REQUEST']['datebirth']) ? ' value="' . $arResult['REQUEST']['datebirth'] . '"' : '' ?>/>
         </label>
     </div>
     <div>
@@ -43,7 +43,7 @@
             <select name="city">
                 <option value="">Выбрать</option>
                 <? foreach ($arResult['CITIES'] as $iCityID => $sCityName): ?>
-                    <option value="<?= $iCityID ?>"<?= (isset($arResult['REQUEST']['city']) && $arResult['REQUEST']['city'] == $iCityID) ? ' selected="selected"' : '' ?>>
+                    <option value="<?= $iCityID ?>"<?= (is_numeric($arResult['REQUEST']['city']) && $arResult['REQUEST']['city'] == $iCityID) ? ' selected="selected"' : '' ?>>
                         <?= $sCityName ?></option>
                 <? endforeach; ?>
             </select>

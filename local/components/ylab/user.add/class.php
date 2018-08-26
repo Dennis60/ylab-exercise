@@ -1,8 +1,6 @@
 <?php
 
-namespace YLab\Validation\Components;
-
-use Bitrix\Main\LoaderException;
+use Bitrix\Main\Type;
 use YLab\Validation\ComponentValidation;
 use YLab\Validation\ValidatorHelper;
 
@@ -12,13 +10,6 @@ use YLab\Validation\ValidatorHelper;
  */
 class AddUserComponent extends ComponentValidation
 {
-    /**
-     * Хранится ID инфоблока
-     *
-     * @var int
-     */
-    protected $iIBlockID;
-
     /**
      * Список городов
      *
@@ -36,8 +27,15 @@ class AddUserComponent extends ComponentValidation
      */
     public function __construct(\CBitrixComponent $component = null, $sFile = __FILE__)
     {
-        $this->iIBlockID = $this->getIBlockID($this->arParams['USERS_IBLOCK_CODE']);
-        $this->arCities = $this->getCities();
+        try {
+            if (!\Bitrix\Main\Loader::includeModule('ylab.webinar')) {
+                throw new \Exception("Необходимо подключить модуль 'YLab Webinar'!");
+            };
+        } catch (\Bitrix\Main\LoaderException $e) {
+            ShowError($e->getMessage());
+        }
+
+        $this->arCities = \YLab\Webinar\Helper::getCities();
 
         parent::__construct($component, $sFile);
     }
@@ -70,7 +68,7 @@ class AddUserComponent extends ComponentValidation
     }
 
     /**
-     *  Формирование массива правил валидации
+     * Формирование массива правил валидации
      *
      * @return array
      */
@@ -78,7 +76,7 @@ class AddUserComponent extends ComponentValidation
     {
         return [
             'name' => 'required',
-            'birthday' => 'required|date_format:d.m.Y',
+            'datebirth' => 'required|date_format:d.m.Y',
             'phone' => 'required|regex:/^\+7\d{10}$/',
             'city' => 'required|numeric|in:' . implode(',', array_keys($this->arCities))
         ];
@@ -89,83 +87,19 @@ class AddUserComponent extends ComponentValidation
      *
      * @param $arRequest
      * @return bool
+     * @throws \Exception
      */
     protected function userAdd($arRequest)
     {
-        if (\CModule::IncludeModule('iblock')) {
-
-            $PROP = array(
-                'PHONE' => $arRequest['phone'],
-                'BIRTHDAY' => $arRequest['birthday'],
-                'CITY' => array('VALUE' => $arRequest['city'])
-            );
-
-            $oIBlockElement = new \CIBlockElement;
-
-            $arFields = array(
-                'IBLOCK_SECTION_ID' => false,
-                'IBLOCK_ID' => $this->iIBlockID,
-                'PROPERTY_VALUES' => $PROP,
+        try {
+            return \YLab\Webinar\YlabUsersTable::add([
                 'NAME' => $arRequest['name'],
-                'ACTIVE' => 'Y'
-            );
-
-            return $oIBlockElement->Add($arFields);
-
-        } else {
-            return false;
+                'CITY' => $this->arCities[$arRequest['city']],
+                'DATEBIRTH' => new Type\Date($arRequest['datebirth'], 'd.m.Y'),
+                'PHONE' => $arRequest['phone']
+            ])->isSuccess();
+        } catch (\Bitrix\Main\SystemException $e) {
+            ShowError($e->getMessage());
         }
-    }
-
-    /**
-     * Получение ID инфоблока
-     *
-     * @param $sBlockCode
-     * @return int|bool
-     */
-    protected function getIBlockID($sBlockCode)
-    {
-        try {
-            if (\Bitrix\Main\Loader::includeModule("iblock")) {
-                $arFilter = array(
-                    'CODE' => $sBlockCode,
-                    'CHECK_PERMISSIONS' => 'N'
-                );
-                if ($oIBlock = \CIBlock::GetList(array('SORT' => 'ASC'), $arFilter)->Fetch()) {
-                    return $oIBlock['ID'];
-                }
-            }
-        } catch (LoaderException $e) {
-            $e->getMessage();
-        }
-
-        return false;
-    }
-
-    /**
-     * Получение списка городов
-     *
-     * @return array
-     */
-    protected function getCities()
-    {
-        $arCities = array();
-
-        try {
-            if (\Bitrix\Main\Loader::includeModule("iblock")) {
-
-                $oCities = \CIBlockPropertyEnum::GetList(Array("ID" => "ASC"),
-                    Array("IBLOCK_ID" => $this->iIBlockID, "CODE" => "CITY"));
-
-                while ($arCity = $oCities->Fetch()) {
-                    $arCities[$arCity["ID"]] = $arCity["VALUE"];
-                }
-
-            }
-        } catch (LoaderException $e) {
-            $e->getMessage();
-        }
-
-        return $arCities;
     }
 }
